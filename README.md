@@ -43,7 +43,7 @@ Aşağıdaki adımlarla projeyi çalıştırabilirsiniz:
 ### 1. Projeyi klonlayın:
 
 ```bash
-git clone https://github.com/kullanici-adi/smart-sales-assistant.git
+git clone https://github.com/eceerseven/Smart-Sales-Stock-Assistant.git
 cd smart-sales-assistant
 ```
 
