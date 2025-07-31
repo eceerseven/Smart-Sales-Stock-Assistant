@@ -1,15 +1,16 @@
+
 # 📊 Smart Sales & Stock Assistant
 
-**Smart Sales & Stock Assistant**, satış ve stok verilerini analiz eden, kullanıcıdan gelen hedeflere göre karşılaştırmalı performans sunan ve yapay zekâ destekli önerilerde bulunan web tabanlı bir Django uygulamasıdır. 
-Register sayfasında kullanıcı adı ve şifre ile kayıt olduktan sonra giriş sağlayabilirsiniz, anasayfada satış ve stok analizi olarak iki seçenek bulunmaktadır,
-stok analizi sonraki aşamada implement edilecektir, satış analiz fonksiyonları tamamlanmıştır. Satış seçildikten sonra gelen sayfada excel dosyaları yükleyerek sisteme satış gerçekleşen ve hedef bilgilerinin girişi sağlanır,
-ek olarak yüklediğiniz data içerisinde analizini yapılmasını istediğiniz zaman aralığını sayfadaki filtelerden seçmeniz gerekmektedir.
-Gönder butonuna basınca satış analizi ve yapay zeka'nın satışı arttırmak için alınabilecek aksiyon ve analizleri ekranın sağ tarafında gösterilir.
-Sol tarafta ise ay bazlı hedef gerçekleşen grafikleri yer almaktadır.
+**Smart Sales & Stock Assistant**, satış ve stok verilerini analiz eden, kullanıcıdan gelen hedeflere göre karşılaştırmalı performans sunan ve yapay zekâ destekli önerilerde bulunan web tabanlı bir Django uygulamasıdır.  
+Register sayfasında kullanıcı adı, şifre ve mail bilgileri ile kayıt olduktan sonra giriş sağlayabilirsiniz, anasayfada satış ve stok analizi olarak iki seçenek bulunmaktadır.  
+Satış seçildikten sonra gelen sayfada excel dosyaları yükleyerek sisteme satış gerçekleşen ve hedef bilgilerinin girişi sağlanır, ek olarak yüklediğiniz data içerisinde analizini yapılmasını istediğiniz zaman aralığını sayfadaki filtrelerden seçmeniz gerekmektedir.  
+Gönder butonuna basınca satış analizi ve yapay zeka'nın satışı arttırmak için alınabilecek aksiyon-analizleri ve ay bazlı hedef gerçekleşen grafikleri ekranda gösterilir.
+
 ---
 
-**ÖNEMLİ: Stok analizi sonraki aşamada implement edilecektir, satış analiz fonksiyonları tamamlanmıştır.
-** Örnek satış ve hedef excel dosyaları proje dosyasında yer almaktadır bu dosyalar ile test edebilirsiniz.
+**ÖNEMLİ: Örnek satış, hedef ve stok excel dosyaları proje dosyasında yer almaktadır, bu dosyalar ile test edebilirsiniz.**  
+**Stok analiz fonksiyonları ikinci aşamada entegre edilmiştir ve aktif çalışmaktadır.**
+
 ---
 
 ## 🚀 Özellikler
@@ -17,10 +18,15 @@ Sol tarafta ise ay bazlı hedef gerçekleşen grafikleri yer almaktadır.
 - Aylık satış verilerini hedeflerle karşılaştırma
 - Gerçekleşme oranlarını hesaplama
 - Aylık grafiksel analiz (adet & gelir)
-- Stok yaşı hesaplama ve sınıflandırma (Stok modülüyle birlikte)
 - AI destekli satış önerileri (OpenAI GPT-3.5-Turbo API)
-- Türkçe & İngilizce dosya destekli sütun eşleştirme
-- Bootstrap destekli responsive kullanıcı arayüzü
+- Stok yaşı hesaplama ve yaş aralıklarına göre sınıflandırma:
+  - 1–3 ay, 3–6 ay, 6–9 ay, 9–12 ay, 12–24 ay, 24+ ay
+- Segment bazlı stok dağılımı grafiği (Chart.js)
+- Stok yönetimi için AI önerileri
+- Kullanıcının yüklediği raporlar veritabanında tutulur
+  - Eğer aynı kullanıcı ve aynı ay için kayıt varsa *güncellenir*
+  - Yoksa yeni kayıt olarak *eklenir*
+- AI Agent entegrasyonu: Satış verisi yüklemeyen kullanıcılar tespit edilip, **karar destekli şekilde hatırlatma e-postası gönderilir**
 
 ---
 
@@ -31,27 +37,26 @@ Sol tarafta ise ay bazlı hedef gerçekleşen grafikleri yer almaktadır.
 | Backend      | Python 3.10+, Django 4.x       |
 | Frontend     | HTML, Bootstrap, Chart.js      |
 | AI           | OpenAI GPT-3.5 Turbo           |
-| Data         | Pandas, Dateparser             |
-| Diğer        | python-dotenv                  |
+| Data         | Pandas, Dateparser, Openpyxl   |
+| Mail         | Django Email Backend (SMTP)    |
+| Diğer        | python-dotenv, SQLite3         |
 
 ---
 
 ## 📦 Kurulum Talimatları
 
-Aşağıdaki adımlarla projeyi çalıştırabilirsiniz:
-
 ### 1. Projeyi klonlayın:
 
 ```bash
 git clone https://github.com/eceerseven/Smart-Sales-Stock-Assistant.git
-cd smart-sales-assistant
+cd Smart-Sales-Stock-Assistant
 ```
 
 ### 2. Sanal ortam oluşturun ve aktif edin:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # Windows için: venv\Scripts\activate
+python -m venv projectEnvironment
+projectEnvironment\Scripts\activate
 ```
 
 ### 3. Gereksinimleri yükleyin:
@@ -60,23 +65,25 @@ source venv/bin/activate  # Windows için: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+> 💡 *Phase 2 ile birlikte aşağıdaki kütüphaneler eklenmiştir:*
+>
+> ```text
+> openai
+> python-dotenv
+> dateparser
+> ```
+
 ### 4. Ortam değişkenlerini girin:
 
-Proje kök dizinine bir `.env` dosyası oluşturun ve içine aşağıdaki satırı ekleyin:
+Proje kök dizinine `.env` adında bir dosya oluşturun:
 
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_openai_api_key
+EMAIL_HOST_USER=your_email_address
+EMAIL_HOST_PASSWORD=your_email_password
 ```
 
-> Not: `.env` dosyasının adı **`.env.txt` değil**, sadece `.env` olmalıdır. Gerekirse dosya uzantısını gösterip düzeltin.
-
-### 5. Sunucuyu başlatın:
-
-```bash
-python manage.py runserver
-```
-
-Uygulama şu adreste çalışacaktır: `http://127.0.0.1:8000/`
+> `.env.txt` değil, sadece `.env` olmalı!
 
 ---
 
@@ -86,25 +93,50 @@ Uygulama şu adreste çalışacaktır: `http://127.0.0.1:8000/`
 2. Satış takibi için:
    - Hedef dosyasını (.xlsx)
    - Satış dosyasını (.xlsx)
-   - Başlangıç ve bitiş aylarını girin
-3. Gönder'e tıklayın.
-4. Aylık performans grafikleri ve AI önerileri görüntülenir.
+   - Başlangıç ve bitiş aylarını seçin
+3. Gönder'e tıklayın
+4. Performans grafikleri ve AI analizleri görüntülenir
+
+---
+
+## 🧪 Stok Analizi Nasıl Çalışır?
+
+1. `Stock` sayfasından `.xlsx` dosyanızı yükleyin
+2. Sistem, ürün giriş tarihine göre stok yaşını hesaplar
+3. Aşağıdaki yaş gruplarına göre segment bazlı grafik gösterilir:
+   - 1–3 ay, 3–6 ay, 6–9 ay, 9–12 ay, 12–24 ay, 24+ ay
+4. Ekranda AI yorumları gösterilir
+5. Örnek dosya `example_stock_data.xlsx` olarak proje içinde mevcuttur
+
+---
+
+## 📤 Phase 2 AI Agent - Hatırlatma Maili Gönderimi 
+
+Veri yüklemeyen kullanıcılar tespit edilir.  
+OpenAI ile çalışan AI Agent, durumu değerlendirir ve uygunsa e-posta gönderilir.
+
+**Test için komut:**
+
+```bash
+python manage.py send_reminders
+```
+
+> `.env` dosyasındaki e-posta ve API bilgileri doğru olmalıdır.
 
 ---
 
 ## 📁 Klasör Yapısı (Özet)
 
 ```
-smart-sales-assistant/
-├── sales/
-│   ├── views.py
-│   ├── forms.py
-│   ├── templates/sales/sales_form.html
+Smart-Sales-Stock-Assistant/
+├── phase-1_initial_ai_integration/
+│   └── (ilk sürüm kodları-güncellemeler buraya da eklendi)
+├── phase-2_ai_agent_and_stock_app/
+│   ├── sales/
+│   ├── stock/
+│   ├── mailagent/
+│   ├── utils/
 │   └── ...
-├── stock/
-├── utils/
-│   └── ai.py
-├── .env
 ├── requirements.txt
 ├── README.md
 └── manage.py
@@ -112,18 +144,12 @@ smart-sales-assistant/
 
 ---
 
-## 💡 Notlar
-
-- AI modülü için GPT-3.5 Turbo kullanılır. Token limiti ve maliyet için OpenAI panelinizi kontrol ediniz.
-- Giriş ekranı, kullanıcılar arasında yönlendirme sağlar; doğrudan /sales/ veya /stock/ sayfasına gidebilirsiniz.
-
----
-
 ## 👩‍💻 Geliştirici
 
 **Ece Erseven**  
-AI First Developer | Business Analytics
+AI First Developer | Business Analytics  
+📫 GitHub: [@eceerseven](https://github.com/eceerseven)
 
 ---
 
-Projenin çalışmasında sorun yaşarsanız benimle iletişime geçebilirsiniz. 
+Herhangi bir sorunuz varsa benimle iletişime geçebilirsiniz. Projeyi test ettiğinizde geri bildirim vermeyi unutmayın 😊
