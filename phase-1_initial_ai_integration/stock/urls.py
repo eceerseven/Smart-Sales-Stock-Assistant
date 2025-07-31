@@ -1,8 +1,7 @@
-# stock/urls.py
-
 from django.urls import path
-from . import views
+from .views import stock_home, stok_analizi
 
 urlpatterns = [
-    path('', views.test_page, name='stock-home'),
+    path("", stock_home),
+    path("stok-analizi/", stok_analizi, name="stok-analizi"),
 ]

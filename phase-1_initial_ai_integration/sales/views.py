@@ -7,8 +7,10 @@ import pandas as pd
 import unicodedata
 import re
 import dateparser
+import datetime
 from .forms import SalesDataForm
 from utils.ai import get_sales_suggestion  # AI entegrasyonu
+from .models import SalesRecord
 
 # Sütun adlarını normalize eden fonksiyon
 def normalize_column(col):
@@ -47,12 +49,11 @@ def sales_form_view(request):
     if request.method == "POST":
         form = SalesDataForm(request.POST, request.FILES)
         if form.is_valid():
-            start_month  = form.cleaned_data['start_month']
-            end_month    = form.cleaned_data['end_month']
-            sales_file   = request.FILES['sales_excel']
-            target_file  = request.FILES['target_excel']
+            start_month = form.cleaned_data['start_month']
+            end_month = form.cleaned_data['end_month']
+            sales_file = request.FILES['sales_excel']
+            target_file = request.FILES['target_excel']
 
-            # --- Satış dosyasını oku ---
             try:
                 df_sales = pd.read_excel(sales_file)
                 df_sales.columns = [normalize_column(c) for c in df_sales.columns]
@@ -60,7 +61,6 @@ def sales_form_view(request):
                 warnings.append(f"Satış Excel dosyası okunamadı: {e}")
                 return render(request, "sales/sales_form.html", {"form": form, "warnings": warnings})
 
-            # --- Hedef dosyasını oku ---
             try:
                 df_target = pd.read_excel(target_file)
                 df_target.columns = [normalize_column(c) for c in df_target.columns]
@@ -68,24 +68,22 @@ def sales_form_view(request):
                 warnings.append(f"Hedef Excel dosyası okunamadı: {e}")
                 return render(request, "sales/sales_form.html", {"form": form, "warnings": warnings})
 
-            # --- Sütun eşleştirme ---
-            sales_cols  = map_column(df_sales.columns, SALES_COLUMN_ALIASES)
+            sales_cols = map_column(df_sales.columns, SALES_COLUMN_ALIASES)
             target_cols = map_column(df_target.columns, TARGET_COLUMN_ALIASES)
 
-            for key in ['urun_adi','tarih','gelir']:
+            for key in ['urun_adi', 'tarih', 'gelir']:
                 if key not in sales_cols:
                     warnings.append(f"Satış dosyasında '{key}' için eşleşen sütun bulunamadı.")
-            for key in ['ay','hedef_adet','hedef_gelir']:
+            for key in ['ay', 'hedef_adet', 'hedef_gelir']:
                 if key not in target_cols or 'yl' not in df_target.columns:
                     warnings.append(f"Hedef dosyasında '{key}' veya 'yl' sütunu eksik.")
 
             if warnings:
                 return render(request, "sales/sales_form.html", {"form": form, "warnings": warnings})
 
-            # --- Satış verisini işle ---
             df_sales[sales_cols['tarih']] = pd.to_datetime(df_sales[sales_cols['tarih']], errors='coerce')
-            df_sales['adet']   = 1
-            df_sales['gelir']  = pd.to_numeric(df_sales[sales_cols['gelir']], errors='coerce').fillna(0)
+            df_sales['adet'] = 1
+            df_sales['gelir'] = pd.to_numeric(df_sales[sales_cols['gelir']], errors='coerce').fillna(0)
             df_sales['year_month'] = df_sales[sales_cols['tarih']].dt.to_period('M')
 
             mask = (
@@ -94,13 +92,11 @@ def sales_form_view(request):
             )
             df_sales_filtered = df_sales.loc[mask]
 
-            # --- Aylık satışları grupla ---
             monthly_sales = df_sales_filtered.groupby('year_month').agg({
                 'adet': 'sum',
                 'gelir': 'sum'
             }).reset_index()
 
-            # --- Hedef verisini işle ---
             df_target['period'] = df_target.apply(
                 lambda r: dateparser.parse(f"{r[target_cols['ay']]} {r['yl']}"), axis=1
             )
@@ -108,31 +104,27 @@ def sales_form_view(request):
             df_target = df_target.dropna(subset=['period'])
             target_dict = df_target.set_index('period').to_dict('index')
 
-            # --- Karşılaştırma listesi ---
             comparison = []
             for _, row in monthly_sales.iterrows():
                 ym = row['year_month']
                 hedef = target_dict.get(ym, {})
-                tq  = hedef.get(target_cols['hedef_adet'])
-                tr  = hedef.get(target_cols['hedef_gelir'])
-                sq  = int(row['adet'])
-                sr  = float(row['gelir'])
+                tq = hedef.get(target_cols['hedef_adet'])
+                tr = hedef.get(target_cols['hedef_gelir'])
+                sq = int(row['adet'])
+                sr = float(row['gelir'])
                 pct = (sq / tq * 100) if tq else 0
-
                 comparison.append({
                     "period": str(ym),
                     "sales_quantity": sq,
-                    "sales_revenue":  sr,
+                    "sales_revenue": sr,
                     "target_quantity": tq,
-                    "target_revenue":  tr,
+                    "target_revenue": tr,
                     "completion_rate": pct
                 })
 
             result = comparison
 
-            # ————————— AI ÖNERİSİ (EN AZ 10 MADDE) ————————— #
             try:
-                # Ürün bazlı toplam satış
                 prod_series = (
                     df_sales_filtered
                     .groupby(sales_cols['urun_adi'])['adet']
@@ -142,7 +134,6 @@ def sales_form_view(request):
                 top_prod, top_qty = prod_series.index[0], prod_series.iloc[0]
                 low_prod, low_qty = prod_series.index[-1], prod_series.iloc[-1]
 
-                # Aylık MoM değişim (son iki dönem)
                 if len(result) >= 2:
                     prev, curr = result[-2], result[-1]
                     mom_qty = curr['sales_quantity'] - prev['sales_quantity']
@@ -150,15 +141,12 @@ def sales_form_view(request):
                 else:
                     mom_qty = mom_pct = None
 
-                # Mevcut ay kalan adet
                 this_month = result[-1]
                 rem_qty = max((this_month['target_quantity'] or 0) - this_month['sales_quantity'], 0)
 
-                # Prompt hazırlığı
                 prompt = (
                     "Aşağıda aylık satış ve hedef verileri var. "
-                    "Lütfen **EN AZ 10 MADDE** halinde, "
-                    "ürün bazlı insight’lar, aylık değişim, "
+                    "Lütfen **EN AZ 10 MADDE** halinde, ürün bazlı insight’lar, aylık değişim, "
                     "mevcut ay için kalan adet ve hangi üründen ne kadar satış gerektiği bilgilerini de ekleyerek "
                     "nokta atışı kampanya ve aksiyon önerileri sunun:\n\n"
                 )
@@ -177,12 +165,38 @@ def sales_form_view(request):
                 prompt += "\nLütfen en az 10 ayrı madde halinde yanıtlayın."
 
                 suggestion = get_sales_suggestion(prompt)
+
+                for r in result:
+                    try:
+                        tarih = pd.to_datetime(r['period']).to_period('M').end_time.date()
+                        kalan_gun = max((tarih - datetime.date.today()).days, 1)
+                        hedef_adet = r['target_quantity'] or 0
+                        hedef_gelir = r['target_revenue'] or 0
+                        toplam_adet = r['sales_quantity']
+                        toplam_gelir = r['sales_revenue']
+                        tamamlanma = r['completion_rate']
+                        gunluk_ortalama = toplam_adet / max(datetime.date.today().day, 1)
+                        kalan_gunluk_gerekli = max((hedef_adet - toplam_adet) / kalan_gun, 0)
+
+                        record, created = SalesRecord.objects.update_or_create(
+    user=request.user,
+    period=str(r['period']),
+    defaults={
+        'hedef_adet': hedef_adet,
+        'hedef_gelir': hedef_gelir,
+        'toplam_adet': toplam_adet,
+        'toplam_gelir': toplam_gelir,
+        'gunluk_ortalama': gunluk_ortalama,
+        'kalan_gunluk_gerekli': kalan_gunluk_gerekli,
+        'tamamlama_yuzdesi': tamamlanma,
+        'yorum': suggestion
+    }
+)
+                    except Exception as e:
+                        warnings.append(f"{r['period']} için kayıt yapılamadı: {e}")
+
             except Exception as e:
                 suggestion = f"AI yanıtı alınamadı: {e}"
-            # —————————————————————————————————————————————— #
-
-        else:
-            print("❌ Form is NOT valid")
 
     return render(request, "sales/sales_form.html", {
         "form": form,
@@ -190,3 +204,4 @@ def sales_form_view(request):
         "warnings": warnings,
         "suggestion": suggestion
     })
+

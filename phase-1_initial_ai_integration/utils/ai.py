@@ -29,3 +29,30 @@ def get_sales_suggestion(prompt: str) -> str:
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"AI yanıtı alınamadı: {e}"
+def openai_stok_analiz_prompt(df):
+    import openai
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    pivot = df.groupby("Yaş Aralığı")["Ürün Adı"].count().to_string()
+
+    prompt = f"""
+Aşağıda stok yaş aralıklarına göre kaç ürünün hangi segmentte olduğu yer alıyor. Buna göre bir analiz ve öneri yaz:
+{pivot}
+    """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Sen deneyimli bir stok yöneticisisin."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.6
+    )
+
+    return response["choices"][0]["message"]["content"]
+
+get_ai_response = get_sales_suggestion

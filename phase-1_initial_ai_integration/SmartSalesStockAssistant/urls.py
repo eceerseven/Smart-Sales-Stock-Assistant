@@ -23,8 +23,10 @@ urlpatterns = [
 
     path('', lambda request: redirect('/users/')),  # ← Ana sayfayı /users/ sayfasına yönlendir
     path('admin/', admin.site.urls),
+    path("stock/", include("stock.urls")),
     path('sales/', include('sales.urls')),
-    path('stock/', include('stock.urls')),
     path('analysis/', include('analysis.urls')),
     path('users/', include('users.urls')),
+    path('mailagent/', include('mailagent.urls')),
+
 ]
