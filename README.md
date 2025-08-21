@@ -6,7 +6,7 @@ Register sayfasında kullanıcı adı ve şifre ile kayıt olduktan sonra giriş
 -Stok seçildikten sonra sadece stok excel dosyası yüklenir, göndere bastıktan sonra ekranın üst kısmında AI destekli satış analizi ve satışı arttırmaya yönelik strateji önerileri yer almaktadır, ekranın alt kısmında ise stok yaş aralığına göre ürün segment dağılımı ve yaş aralığına göre stokta bekleyen marka dağılımı grafikleri gösterilir. 
 ---
 
-** Örnek satış, hedef ve stok excel dosyaları proje dosyasında yer almaktadır bu dosyalar ile test gerçekleştirilebilir.
+**ÖNEMLİ: Örnek satış, hedef ve stok excel dosyaları proje dosyasında Final Phase içerisinde yer almaktadır bu dosyalar ile test gerçekleştirilebilir.
 ---
 
 ## 🚀 Özellikler
