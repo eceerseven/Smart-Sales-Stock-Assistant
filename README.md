@@ -1,15 +1,12 @@
 # 📊 Smart Sales & Stock Assistant
 
 **Smart Sales & Stock Assistant**, satış ve stok verilerini analiz eden, kullanıcıdan gelen hedeflere göre karşılaştırmalı performans sunan ve yapay zekâ destekli önerilerde bulunan web tabanlı bir Django uygulamasıdır. 
-Register sayfasında kullanıcı adı ve şifre ile kayıt olduktan sonra giriş sağlayabilirsiniz, anasayfada satış ve stok analizi olarak iki seçenek bulunmaktadır,
-stok analizi sonraki aşamada implement edilecektir, satış analiz fonksiyonları tamamlanmıştır. Satış seçildikten sonra gelen sayfada excel dosyaları yükleyerek sisteme satış gerçekleşen ve hedef bilgilerinin girişi sağlanır,
-ek olarak yüklediğiniz data içerisinde analizini yapılmasını istediğiniz zaman aralığını sayfadaki filtelerden seçmeniz gerekmektedir.
-Gönder butonuna basınca satış analizi ve yapay zeka'nın satışı arttırmak için alınabilecek aksiyon ve analizleri ekranın sağ tarafında gösterilir.
-Sol tarafta ise ay bazlı hedef gerçekleşen grafikleri yer almaktadır.
+Register sayfasında kullanıcı adı ve şifre ile kayıt olduktan sonra giriş sağlayabilirsiniz, anasayfada satış ve stok analizi olarak iki seçenek bulunmaktadır.
+-Satış seçildikten sonra gelen sayfada excel dosyaları yükleyerek sisteme satış gerçekleşen ve hedef bilgilerinin girişi sağlanır, ek olarak yüklediğiniz data içerisinde analizini yapılmasını istediğiniz zaman aralığını sayfadaki filtelerden seçmeniz gerekmektedir.Gönder butonuna basınca satış analizi ve yapay zeka'nın satışı arttırmak için alınabilecek aksiyon ve analizleri gösterilir. Ek olarak ay bazlı hedef gerçekleşen grafikleri de yer almaktadır.
+-Stok seçildikten sonra sadece stok excel dosyası yüklenir, göndere bastıktan sonra ekranın üst kısmında AI destekli satış analizi ve satışı arttırmaya yönelik strateji önerileri yer almaktadır, ekranın alt kısmında ise stok yaş aralığına göre ürün segment dağılımı ve yaş aralığına göre stokta bekleyen marka dağılımı grafikleri gösterilir. 
 ---
 
-**ÖNEMLİ: Stok analizi sonraki aşamada implement edilecektir, satış analiz fonksiyonları tamamlanmıştır.
-** Örnek satış ve hedef excel dosyaları proje dosyasında yer almaktadır bu dosyalar ile test edebilirsiniz.
+** Örnek satış, hedef ve stok excel dosyaları proje dosyasında yer almaktadır bu dosyalar ile test gerçekleştirilebilir.
 ---
 
 ## 🚀 Özellikler
@@ -89,7 +86,7 @@ Uygulama şu adreste çalışacaktır: `http://127.0.0.1:8000/`
    - Başlangıç ve bitiş aylarını girin
 3. Gönder'e tıklayın.
 4. Aylık performans grafikleri ve AI önerileri görüntülenir.
-
+5. Stok takibi için sadece stok verisi yüklenmesi yeterlidir (.xlsx)
 ---
 
 ## 📁 Klasör Yapısı (Özet)
