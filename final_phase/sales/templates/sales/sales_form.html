@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Satış Analizi | Sales Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container-fluid px-4 py-4">
+    <h2 class="mb-4">Satış Analizi | Sales Analysis</h2>
+
+    <!-- Form -->
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                {{ form.start_month.label_tag }}<br>
+                {{ form.start_month }}
+            </div>
+            <div class="col-md-6">
+                {{ form.end_month.label_tag }}<br>
+                {{ form.end_month }}
+            </div>
+            <div class="col-md-6">
+                {{ form.sales_excel.label_tag }}<br>
+                {{ form.sales_excel }}
+            </div>
+            <div class="col-md-6">
+                {{ form.target_excel.label_tag }}<br>
+                {{ form.target_excel }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Gönder</button>
+    </form>
+
+    <!-- Uyarılar -->
+    {% if warnings %}
+        <div class="alert alert-warning">
+            <ul class="mb-0">
+                {% for warning in warnings %}
+                    <li>{{ warning }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- AI Önerisi -->
+    {% if result %}
+        {% if suggestion %}
+        <div class="alert shadow-sm p-4 mb-4" style="background: linear-gradient(to right, #cde5f9, #e0f2fe); border-left: 5px solid #007bff;">
+            <h5 class="mb-3">🤖 AI Satış Önerisi | AI Sales Suggestion</h5>
+            <p class="mb-0">{{ suggestion|linebreaks }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Grafikler -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h5 class="text-center">Aylık Satış vs Hedef – Adet</h5>
+                <canvas id="quantityChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h5 class="text-center">Aylık Satış vs Hedef – Gelir</h5>
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h5 class="text-center">Aylık Satış vs Hedef – Gerçekleşme Oranı</h5>
+                <canvas id="completionRateChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tablo -->
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Dönem</th>
+                        <th>Satış Adedi</th>
+                        <th>Satış Geliri (TL)</th>
+                        <th>Hedef Satış Adedi</th>
+                        <th>Hedef Gelir (TL)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in result %}
+                    <tr>
+                        <td>{{ row.period }}</td>
+                        <td>{{ row.sales_quantity }}</td>
+                        <td>{{ row.sales_revenue|floatformat:2 }}</td>
+                        <td>{% if row.target_quantity %}{{ row.target_quantity }}{% else %}-{% endif %}</td>
+                        <td>{% if row.target_revenue %}{{ row.target_revenue|floatformat:2 }}{% else %}-{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chart.js Kodları -->
+        <script>
+            const labels = [{% for row in result %}"{{ row.period }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const salesQuantities = [{% for row in result %}{{ row.sales_quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const targetQuantities = [{% for row in result %}{{ row.target_quantity|default:"null" }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const salesRevenues = [{% for row in result %}{{ row.sales_revenue }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const targetRevenues = [{% for row in result %}{{ row.target_revenue|default:"null" }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+            const completionRates = [{% for row in result %}{{ row.completion_rate }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+            new Chart(document.getElementById("quantityChart"), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Satış Adedi', data: salesQuantities, backgroundColor: 'rgba(31,78,122,0.8)' },
+                        { label: 'Hedef Adet', data: targetQuantities, backgroundColor: 'rgba(76,195,193,0.6)' }
+                    ]
+                }
+            });
+
+            new Chart(document.getElementById("revenueChart"), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Satış Geliri (TL)', data: salesRevenues, backgroundColor: 'rgba(31,78,122,0.8)' },
+                        { label: 'Hedef Gelir (TL)', data: targetRevenues, backgroundColor: 'rgba(76,195,193,0.6)' }
+                    ]
+                }
+            });
+
+            new Chart(document.getElementById("completionRateChart"), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Gerçekleşme Oranı (%)', data: completionRates, backgroundColor: 'rgba(255,99,132,0.8)' }
+                    ]
+                }
+            });
+        </script>
+    {% endif %}
+</div>
+</body>
+</html>
