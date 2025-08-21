@@ -3,19 +3,19 @@
 {% block title %}Stok Analizi | Stock Analysis{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4">
-       <h2 class="mb-4">Stok Analizi | Stock Analysis</h2>
+<div class="container-fluid px-4 py-4">
+    <h2 class="mb-4">Stok Analizi | Stock Analysis</h2>
 
     <!-- Dosya Yükleme Formu -->
-    <form method="post" enctype="multipart/form-data" class="mb-4 row g-3 align-items-center">
+    <form method="post" enctype="multipart/form-data" class="mb-4">
         {% csrf_token %}
-        <div class="col-auto">
-            {{ form.stok_dosyasi.label_tag }}
-            {{ form.stok_dosyasi }}
+        <div class="row g-3">
+            <div class="col-md-12">
+                {{ form.stok_dosyasi.label_tag }}<br>
+                {{ form.stok_dosyasi }}
+            </div>
         </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Yükle | Upload</button>
-        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Yükle | Upload</button>
     </form>
 
     <!-- AI Yorum -->
@@ -45,7 +45,6 @@
         </div>
     </div>
     {% endif %}
-
 </div>
 
 <!-- Chart.js -->
