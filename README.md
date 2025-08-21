@@ -1,5 +1,7 @@
 # 📊 Smart Sales & Stock Assistant
 
+**DEMO VIDEO LINK** https://www.youtube.com/watch?v=vWeiImw-LTo
+
 **Smart Sales & Stock Assistant**, satış ve stok verilerini analiz eden, kullanıcıdan gelen hedeflere göre karşılaştırmalı performans sunan ve yapay zekâ destekli önerilerde bulunan web tabanlı bir Django uygulamasıdır. 
 Register sayfasında kullanıcı adı ve şifre ile kayıt olduktan sonra giriş sağlayabilirsiniz, anasayfada satış ve stok analizi olarak iki seçenek bulunmaktadır.
 -Satış seçildikten sonra gelen sayfada excel dosyaları yükleyerek sisteme satış gerçekleşen ve hedef bilgilerinin girişi sağlanır, ek olarak yüklediğiniz data içerisinde analizini yapılmasını istediğiniz zaman aralığını sayfadaki filtelerden seçmeniz gerekmektedir.Gönder butonuna basınca satış analizi ve yapay zeka'nın satışı arttırmak için alınabilecek aksiyon ve analizleri gösterilir. Ek olarak ay bazlı hedef gerçekleşen grafikleri de yer almaktadır.
